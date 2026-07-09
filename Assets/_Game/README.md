@@ -11,3 +11,7 @@
 - 美术：`_Game/Art/`
 - 预制体：`_Game/Prefabs/`
 - SO 资产：`_Game/Data/ScriptableObjects/`
+
+## 系统文档
+
+- 场景管理与关卡切换：[Docs/SceneFlowGuide.md](../../Docs/SceneFlowGuide.md)
