@@ -21,6 +21,13 @@ public class PlayerController : MonoBehaviour
 
     private PlayerBody currentPlayer;
 
+    public PlayerBody CurrentPlayer => currentPlayer;
+
+    public bool IsControlling(PlayerBody body)
+    {
+        return body != null && currentPlayer == body;
+    }
+
     private void Start()
     {
         InitializePlayers();
@@ -28,6 +35,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!CanAcceptInput())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(releaseBothKey))
         {
             ReleaseBothPlayers();
@@ -42,6 +54,11 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!CanAcceptInput())
+        {
+            return;
+        }
+
         if (currentPlayer == null)
         {
             return;
@@ -246,5 +263,10 @@ public class PlayerController : MonoBehaviour
         }
 
         return bestPoint;
+    }
+
+    private bool CanAcceptInput()
+    {
+        return GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying;
     }
 }
