@@ -12,6 +12,7 @@ public class PlayerBody : MonoBehaviour
 
     public bool IsFixed => isFixed;
     public Vector2 Position => body != null ? body.position : (Vector2)transform.position;
+    public Vector2 Velocity => body != null ? body.velocity : Vector2.zero;
 
     private void Awake()
     {
@@ -64,6 +65,18 @@ public class PlayerBody : MonoBehaviour
         body.angularVelocity = 0f;
         body.position = position;
         transform.position = position;
+    }
+
+    public void SetVelocity(Vector2 velocity)
+    {
+        EnsureInitialized();
+
+        if (body == null)
+        {
+            return;
+        }
+
+        body.velocity = velocity;
     }
 
     public void SetFixed(bool shouldBeFixed)

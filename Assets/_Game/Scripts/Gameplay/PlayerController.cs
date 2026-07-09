@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float swingForce = 12f;
     [SerializeField] private KeyCode switchKey = KeyCode.F;
     [SerializeField] private KeyCode releaseBothKey = KeyCode.G;
+    [SerializeField] private float reattachCooldown = 0.35f;
 
     [Header("Debug")]
     [SerializeField] private bool drawSwingTangent = true;
@@ -20,6 +21,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Color attachPreviewColor = Color.green;
 
     private PlayerBody currentPlayer;
+    private bool bothReleased;
+    private PlayerBody blockedAutoAttachPlayer;
+    private float blockedAutoAttachUntil;
 
     public PlayerBody CurrentPlayer => currentPlayer;
 
@@ -50,6 +54,8 @@ public class PlayerController : MonoBehaviour
         {
             SwitchPlayer();
         }
+
+        TryAutoAttachReleasedPlayers();
     }
 
     private void FixedUpdate()
@@ -107,7 +113,7 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawLine(origin, origin + (Vector3)(tangentA * tangentPreviewLength));
         Gizmos.DrawLine(origin, origin + (Vector3)(tangentB * tangentPreviewLength));
 
-        AttachPoint attachPoint = FindAvailableAttachPoint(activePlayer);
+        AttachPoint attachPoint = FindAvailableAttachPoint(activePlayer, false);
         if (attachPoint != null)
         {
             Gizmos.color = attachPreviewColor;
@@ -136,22 +142,14 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        AttachPoint attachPoint = FindAvailableAttachPoint(currentPlayer);
+        AttachPoint attachPoint = FindAvailableAttachPoint(currentPlayer, false);
         if (attachPoint == null)
         {
+            ReleaseBothPlayers();
             return;
         }
 
-        currentPlayer.SnapToPosition(attachPoint.Position);
-        currentPlayer.SetFixed(true);
-
-        PlayerBody nextPlayer = GetOtherPlayer(currentPlayer);
-        currentPlayer = nextPlayer;
-
-        if (currentPlayer != null)
-        {
-            currentPlayer.SetFixed(false);
-        }
+        AttachPlayerToPoint(currentPlayer, attachPoint);
     }
 
     public void ReleaseBothPlayers()
@@ -166,8 +164,30 @@ public class PlayerController : MonoBehaviour
             currentPlayer = defaultControlledPlayer != null ? defaultControlledPlayer : playerA;
         }
 
+        PlayerBody movingPlayer = currentPlayer;
+        PlayerBody fixedPlayer = GetOtherPlayer(movingPlayer);
+        Vector2 movingVelocity = movingPlayer != null ? movingPlayer.Velocity : Vector2.zero;
+
+        bothReleased = true;
         playerA.SetFixed(false);
         playerB.SetFixed(false);
+
+        if (movingPlayer != null)
+        {
+            movingPlayer.SetVelocity(movingVelocity);
+        }
+
+        if (fixedPlayer != null)
+        {
+            fixedPlayer.SetVelocity(movingVelocity * 0.5f);
+            blockedAutoAttachPlayer = fixedPlayer;
+            blockedAutoAttachUntil = Time.time + reattachCooldown;
+        }
+        else
+        {
+            blockedAutoAttachPlayer = null;
+            blockedAutoAttachUntil = 0f;
+        }
     }
 
     public void FixCurrentPlayer()
@@ -178,6 +198,7 @@ public class PlayerController : MonoBehaviour
         }
 
         currentPlayer.SetFixed(true);
+        bothReleased = false;
     }
 
     private void InitializePlayers()
@@ -202,11 +223,64 @@ public class PlayerController : MonoBehaviour
         currentPlayer = nextPlayer;
 
         PlayerBody otherPlayer = GetOtherPlayer(currentPlayer);
-        currentPlayer.SetFixed(false);
+        if (currentPlayer != null)
+        {
+            currentPlayer.SetFixed(false);
+        }
 
         if (otherPlayer != null)
         {
             otherPlayer.SetFixed(true);
+        }
+
+        bothReleased = false;
+        blockedAutoAttachPlayer = null;
+        blockedAutoAttachUntil = 0f;
+    }
+
+    private void AttachPlayerToPoint(PlayerBody playerToAttach, AttachPoint attachPoint)
+    {
+        if (playerToAttach == null || attachPoint == null)
+        {
+            return;
+        }
+
+        playerToAttach.SnapToPosition(attachPoint.Position);
+        playerToAttach.SetFixed(true);
+
+        PlayerBody otherPlayer = GetOtherPlayer(playerToAttach);
+        currentPlayer = otherPlayer;
+
+        if (currentPlayer != null)
+        {
+            currentPlayer.SetFixed(false);
+        }
+
+        bothReleased = false;
+        blockedAutoAttachPlayer = null;
+        blockedAutoAttachUntil = 0f;
+    }
+
+    private void TryAutoAttachReleasedPlayers()
+    {
+        if (!bothReleased)
+        {
+            return;
+        }
+
+        PlayerBody firstCandidate = currentPlayer;
+        AttachPoint attachPoint = FindAvailableAttachPoint(firstCandidate, true);
+        if (attachPoint != null)
+        {
+            AttachPlayerToPoint(firstCandidate, attachPoint);
+            return;
+        }
+
+        PlayerBody secondCandidate = GetOtherPlayer(currentPlayer);
+        attachPoint = FindAvailableAttachPoint(secondCandidate, true);
+        if (attachPoint != null)
+        {
+            AttachPlayerToPoint(secondCandidate, attachPoint);
         }
     }
 
@@ -235,9 +309,14 @@ public class PlayerController : MonoBehaviour
         return playerA;
     }
 
-    private AttachPoint FindAvailableAttachPoint(PlayerBody playerBody)
+    private AttachPoint FindAvailableAttachPoint(PlayerBody playerBody, bool respectBlock)
     {
         if (playerBody == null)
+        {
+            return null;
+        }
+
+        if (respectBlock && playerBody == blockedAutoAttachPlayer && Time.time < blockedAutoAttachUntil)
         {
             return null;
         }
