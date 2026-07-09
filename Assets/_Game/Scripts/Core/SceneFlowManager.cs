@@ -138,6 +138,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             return;
         }
 
+        PrepareGameStateForLoad();
         StartCoroutine(LoadSceneRoutine(request));
     }
 
@@ -146,7 +147,6 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     {
         isLoading = true;
         EnsureTransitionUI();
-        PrepareGameStateForLoad();
 
         Debug.Log(
             $"[SceneFlowManager] 开始加载：{CurrentSceneName} -> {request.TargetSceneName} " +

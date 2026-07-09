@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameOverUI : MonoBehaviour
@@ -52,6 +51,12 @@ public class GameOverUI : MonoBehaviour
 
     public void OnRetryClicked()
     {
+        if (SceneFlowManager.Instance != null)
+        {
+            SceneFlowManager.Instance.ReloadCurrentLevel();
+            return;
+        }
+
         Hide();
 
         if (GameStateManager.Instance != null)
@@ -63,7 +68,7 @@ public class GameOverUI : MonoBehaviour
             Time.timeScale = 1f;
         }
 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Debug.LogWarning("[GameOverUI] SceneFlowManager not found, retry did not reload scene.");
     }
 
     private void EnsureEventSystem()
