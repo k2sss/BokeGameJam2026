@@ -5091,6 +5091,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -5184,6 +5188,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
@@ -6799,6 +6807,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -6974,7 +6986,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cfa7cdc5e763cf4d9ebbf3f37c5191f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attachRadius: 1
+  attachRadius: 1.21
   canMoveVerticallyWhileAttached: 0
   verticalMoveSpeed: 3
   clampVerticalMovement: 0
@@ -17990,6 +18002,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -18249,6 +18265,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
@@ -23183,6 +23203,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -23276,6 +23300,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
@@ -24669,6 +24697,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -24762,6 +24794,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
@@ -29919,6 +29955,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
@@ -35817,6 +35857,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 
       objectReference: {fileID: 5912421213321467658, guid: be36cee5d8b54ca43b5bd384812b77f5, type: 3}
@@ -35910,6 +35954,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 179510555}
     m_Modifications:
+    - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
+      propertyPath: attachRadius
+      value: 1.21
+      objectReference: {fileID: 0}
     - target: {fileID: 1360618826689899888, guid: f51f1fc26a743f34c9f665e8e372f5a1, type: 3}
       propertyPath: attachEffectPrefab
       value: 

@@ -1099,6 +1099,7 @@ MonoBehaviour:
   swingForce: 30
   switchKey: 102
   releaseBothKey: 103
+  skipLevelKey: 116
   reattachCooldown: 1
   drawSwingTangent: 1
   tangentPreviewLength: 1.5
