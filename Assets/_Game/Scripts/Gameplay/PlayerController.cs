@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -6,13 +7,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerBody playerA;
     [SerializeField] private PlayerBody playerB;
     [SerializeField] private PlayerBody defaultControlledPlayer;
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
     [Header("Control")]
     [SerializeField] private float swingForce = 12f;
     [SerializeField] private KeyCode switchKey = KeyCode.F;
     [SerializeField] private KeyCode releaseBothKey = KeyCode.G;
     [SerializeField] private float reattachCooldown = 0.35f;
-
     [Header("Debug")]
     [SerializeField] private bool drawSwingTangent = true;
     [SerializeField] private float tangentPreviewLength = 1.5f;
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        ResolveVirtualCamera();
         InitializePlayers();
     }
 
@@ -236,6 +238,7 @@ public class PlayerController : MonoBehaviour
         bothReleased = false;
         blockedAutoAttachPlayer = null;
         blockedAutoAttachUntil = 0f;
+        UpdateVirtualCameraFollow();
     }
 
     private void AttachPlayerToPoint(PlayerBody playerToAttach, AttachPoint attachPoint)
@@ -259,6 +262,7 @@ public class PlayerController : MonoBehaviour
         bothReleased = false;
         blockedAutoAttachPlayer = null;
         blockedAutoAttachUntil = 0f;
+        UpdateVirtualCameraFollow();
     }
 
     private void TryAutoAttachReleasedPlayers()
@@ -347,5 +351,30 @@ public class PlayerController : MonoBehaviour
     private bool CanAcceptInput()
     {
         return GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying;
+    }
+
+    private void ResolveVirtualCamera()
+    {
+        if (virtualCamera != null)
+        {
+            return;
+        }
+
+        virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        if (virtualCamera == null)
+        {
+            Debug.LogWarning("PlayerController could not find a CinemachineVirtualCamera in the scene.");
+        }
+    }
+
+    private void UpdateVirtualCameraFollow()
+    {
+        ResolveVirtualCamera();
+        if (virtualCamera == null)
+        {
+            return;
+        }
+
+        virtualCamera.Follow = currentPlayer != null ? currentPlayer.transform : null;
     }
 }

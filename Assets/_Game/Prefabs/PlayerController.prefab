@@ -1095,6 +1095,7 @@ MonoBehaviour:
   playerA: {fileID: 388151998287212097}
   playerB: {fileID: 8166526639363076183}
   defaultControlledPlayer: {fileID: 388151998287212097}
+  virtualCamera: {fileID: 0}
   swingForce: 30
   switchKey: 102
   releaseBothKey: 103
