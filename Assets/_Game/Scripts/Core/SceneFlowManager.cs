@@ -14,12 +14,18 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 
     [Header("组件")]
     [SerializeField] private SceneTransitionUI transitionUI;
+    [SerializeField] private NarrativeIntroController narrativeIntro;
+    [SerializeField] private OutcomePanelController outcomePanels;
 
     private bool isLoading;
 
     protected override bool PersistAcrossScenes => true;
 
     public bool IsLoading => isLoading;
+
+    public NarrativeIntroController NarrativeIntro => narrativeIntro;
+
+    public OutcomePanelController OutcomePanels => outcomePanels;
 
     public string CurrentSceneName => SceneManager.GetActiveScene().name;
 
@@ -34,9 +40,29 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     {
         base.Awake();
         EnsureTransitionUI();
+        EnsureNarrativeIntro();
+        EnsureOutcomePanels();
     }
 
-    /// <summary>运行时或主界面初始化时注入关卡配置表。</summary>
+    /// <summary>显示胜利面板，玩家点击继续后加载下一关（或最后一关回主菜单）。</summary>
+    public void StartVictoryFlow()
+    {
+        StartCoroutine(VictoryFlowRoutine());
+    }
+
+    private IEnumerator VictoryFlowRoutine()
+    {
+        EnsureOutcomePanels();
+
+        if (outcomePanels != null)
+        {
+            yield return outcomePanels.ShowVictoryAndWait(CurrentLevelIndex);
+            yield break;
+        }
+
+        LoadNextLevel();
+    }
+
     public void SetLevelDatabase(LevelDatabaseSO database)
     {
         if (database != null)
@@ -84,9 +110,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         StartLoad(new SceneLoadRequest
         {
             TargetSceneName = entry.sceneName,
-            Mode = TransitionMode.LevelComplete,
-            BackgroundSprite = entry.backgroundSprite,
-            CharacterSprite = entry.characterSprite
+            Mode = TransitionMode.SimpleFade
         });
     }
 
@@ -98,29 +122,23 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
 
         int currentIndex = CurrentLevelIndex;
-        string nextSceneName = levelDatabase.ResolveNextSceneNameByCurrentScene(CurrentSceneName);
-        TransitionMode mode = TransitionMode.SimpleFade;
-        Sprite background = null;
-        Sprite character = null;
 
-        // 还有下一关时使用过关图文转场，并展示「即将进入关卡」的素材
-        if (currentIndex >= 0 && !levelDatabase.IsLastLevel(currentIndex))
+        if (currentIndex >= 0 && levelDatabase.IsLastLevel(currentIndex))
         {
-            LevelEntry nextEntry = levelDatabase.GetNextLevel(currentIndex);
-            if (nextEntry != null)
+            OnAllLevelsCompleted();
+            StartLoad(new SceneLoadRequest
             {
-                mode = TransitionMode.LevelComplete;
-                background = nextEntry.backgroundSprite;
-                character = nextEntry.characterSprite;
-            }
+                TargetSceneName = levelDatabase.MainMenuSceneName,
+                Mode = TransitionMode.SimpleFade
+            });
+            return;
         }
 
+        string nextSceneName = levelDatabase.ResolveNextSceneNameByCurrentScene(CurrentSceneName);
         StartLoad(new SceneLoadRequest
         {
             TargetSceneName = nextSceneName,
-            Mode = mode,
-            BackgroundSprite = background,
-            CharacterSprite = character
+            Mode = TransitionMode.SimpleFade
         });
     }
 
@@ -129,7 +147,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         StartLoad(new SceneLoadRequest
         {
             TargetSceneName = CurrentSceneName,
-            Mode = TransitionMode.SimpleFade
+            Mode = TransitionMode.SimpleFade,
+            SkipLevelIntro = true
         });
     }
 
@@ -145,6 +164,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             TargetSceneName = levelDatabase.MainMenuSceneName,
             Mode = mode
         });
+    }
+
+    protected virtual void OnAllLevelsCompleted()
+    {
+        Debug.Log("[SceneFlowManager] OnAllLevelsCompleted");
     }
 
     private void StartLoad(SceneLoadRequest request)
@@ -165,24 +189,27 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         StartCoroutine(LoadSceneRoutine(request));
     }
 
-    /// <summary>统一的场景加载协程：转场淡出 → 异步加载 → 转场淡入 → 恢复 Playing。</summary>
+    /// <summary>统一的场景加载协程：转场淡出 → 异步加载 → 关卡介绍（若有）→ 转场淡入 → 恢复 Playing。</summary>
     private IEnumerator LoadSceneRoutine(SceneLoadRequest request)
     {
         isLoading = true;
         EnsureTransitionUI();
+        EnsureNarrativeIntro();
+        EnsureOutcomePanels();
+        outcomePanels?.HideAll();
 
         Debug.Log(
             $"[SceneFlowManager] 开始加载：{CurrentSceneName} -> {request.TargetSceneName} " +
             $"({request.Mode})");
 
-        yield return PlayTransitionOut(request);
+        yield return PlayTransitionOut();
 
         if (!Application.CanStreamedLevelBeLoaded(request.TargetSceneName))
         {
             Debug.LogError(
                 $"[SceneFlowManager] 场景 '{request.TargetSceneName}' 无法加载。" +
                 "请确认场景存在且已加入 Build Settings。");
-            yield return PlayTransitionIn(request.Mode);
+            yield return PlayTransitionIn();
             FinishLoad();
             yield break;
         }
@@ -191,7 +218,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         if (loadOperation == null)
         {
             Debug.LogError($"[SceneFlowManager] LoadSceneAsync 返回 null：{request.TargetSceneName}");
-            yield return PlayTransitionIn(request.Mode);
+            yield return PlayTransitionIn();
             FinishLoad();
             yield break;
         }
@@ -208,46 +235,63 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             yield return null;
         }
 
-        yield return PlayTransitionIn(request.Mode);
+        // 有关卡介绍时先播介绍（黑幕/底层背景遮住场景），再淡入；避免先露关卡再出介绍。
+        if (ShouldPlayLevelIntro(request))
+        {
+            yield return PlayLevelIntroIfNeeded(request);
+        }
+
+        yield return PlayTransitionIn();
         FinishLoad();
 
         Debug.Log($"[SceneFlowManager] 加载完成：{SceneManager.GetActiveScene().name}");
     }
 
-    private IEnumerator PlayTransitionOut(SceneLoadRequest request)
+    private bool ShouldPlayLevelIntro(SceneLoadRequest request)
     {
-        if (transitionUI == null)
+        if (request.SkipLevelIntro || !EnsureDatabase() || narrativeIntro == null)
         {
-            yield break;
+            return false;
         }
 
-        if (request.Mode == TransitionMode.LevelComplete)
+        string loadedSceneName = SceneManager.GetActiveScene().name;
+        if (levelDatabase.IsMainMenuScene(loadedSceneName))
         {
-            yield return transitionUI.PlayLevelTransitionOut(
-                request.BackgroundSprite,
-                request.CharacterSprite);
+            return false;
         }
-        else
-        {
-            yield return transitionUI.PlaySimpleFadeOut();
-        }
+
+        return levelDatabase.GetIndexByScene(loadedSceneName) >= 0;
     }
 
-    private IEnumerator PlayTransitionIn(TransitionMode mode)
+    private IEnumerator PlayLevelIntroIfNeeded(SceneLoadRequest request)
+    {
+        if (!ShouldPlayLevelIntro(request))
+        {
+            yield break;
+        }
+
+        int levelIndex = levelDatabase.GetIndexByScene(SceneManager.GetActiveScene().name);
+        yield return narrativeIntro.ShowLevelIntroAndWait(levelIndex);
+    }
+
+    private IEnumerator PlayTransitionOut()
     {
         if (transitionUI == null)
         {
             yield break;
         }
 
-        if (mode == TransitionMode.LevelComplete)
+        yield return transitionUI.PlaySimpleFadeOut();
+    }
+
+    private IEnumerator PlayTransitionIn()
+    {
+        if (transitionUI == null)
         {
-            yield return transitionUI.PlayLevelTransitionIn();
+            yield break;
         }
-        else
-        {
-            yield return transitionUI.PlaySimpleFadeIn();
-        }
+
+        yield return transitionUI.PlaySimpleFadeIn();
     }
 
     private void PrepareGameStateForLoad()
@@ -294,6 +338,32 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
     }
 
+    private void EnsureNarrativeIntro()
+    {
+        if (narrativeIntro == null)
+        {
+            narrativeIntro = GetComponent<NarrativeIntroController>();
+        }
+
+        if (narrativeIntro == null)
+        {
+            narrativeIntro = gameObject.AddComponent<NarrativeIntroController>();
+        }
+    }
+
+    private void EnsureOutcomePanels()
+    {
+        if (outcomePanels == null)
+        {
+            outcomePanels = GetComponent<OutcomePanelController>();
+        }
+
+        if (outcomePanels == null)
+        {
+            outcomePanels = gameObject.AddComponent<OutcomePanelController>();
+        }
+    }
+
     private bool EnsureDatabase()
     {
         if (levelDatabase != null)
@@ -305,12 +375,10 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         return false;
     }
 
-    /// <summary>单次场景加载请求参数。</summary>
     private struct SceneLoadRequest
     {
         public string TargetSceneName;
         public TransitionMode Mode;
-        public Sprite BackgroundSprite;
-        public Sprite CharacterSprite;
+        public bool SkipLevelIntro;
     }
 }

@@ -37,6 +37,12 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
             AudioManager.Instance.EnterGameOverMusic();
         }
 
+        if (TryShowDefeatPanel())
+        {
+            Debug.Log("[GameStateManager] Game Over");
+            return;
+        }
+
         if (GameOverUI.Instance != null)
         {
             GameOverUI.Instance.Show();
@@ -66,6 +72,8 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
     /// </summary>
     public void PrepareForSceneLoad()
     {
+        HideOutcomePanels();
+
         if (CurrentState == GameState.Transitioning)
         {
             return;
@@ -88,11 +96,35 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
         CurrentState = GameState.Playing;
         Time.timeScale = 1f;
 
+        HideOutcomePanels();
+
         if (GameOverUI.Instance != null)
         {
             GameOverUI.Instance.Hide();
         }
 
         Debug.Log("[GameStateManager] Reset to Playing");
+    }
+
+    private bool TryShowDefeatPanel()
+    {
+        if (SceneFlowManager.Instance == null)
+        {
+            return false;
+        }
+
+        OutcomePanelController panels = SceneFlowManager.Instance.OutcomePanels;
+        if (panels == null)
+        {
+            return false;
+        }
+
+        int levelIndex = SceneFlowManager.Instance.CurrentLevelIndex;
+        return panels.ShowDefeat(levelIndex);
+    }
+
+    private static void HideOutcomePanels()
+    {
+        SceneFlowManager.Instance?.OutcomePanels?.HideAll();
     }
 }

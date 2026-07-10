@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -150,12 +151,38 @@ public class MainMenuController : MonoBehaviour
 
     private void StartNewGameAndLoadLevel(int levelIndex)
     {
+        StartCoroutine(StartNewGameAndLoadLevelRoutine(levelIndex));
+    }
+
+    private IEnumerator StartNewGameAndLoadLevelRoutine(int levelIndex)
+    {
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.BeginNewGame();
         }
 
+        NarrativeIntroController narrativeIntro = GetNarrativeIntro();
+        if (narrativeIntro != null)
+        {
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.EnterTransitioning();
+            }
+
+            yield return narrativeIntro.ShowNewGameIntroAndWait();
+        }
+
         LoadLevelFromMenu(levelIndex);
+    }
+
+    private static NarrativeIntroController GetNarrativeIntro()
+    {
+        if (SceneFlowManager.Instance == null)
+        {
+            return null;
+        }
+
+        return SceneFlowManager.Instance.NarrativeIntro;
     }
 
     private void LoadLevelFromMenu(int levelIndex)
