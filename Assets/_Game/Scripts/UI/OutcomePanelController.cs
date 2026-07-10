@@ -242,18 +242,22 @@ public class OutcomePanelController : MonoBehaviour
 
         canvasRoot.AddComponent<GraphicRaycaster>();
 
+        RectTransform canvasRect = canvasRoot.GetComponent<RectTransform>();
+        if (canvasRect != null)
+        {
+            canvasRect.anchorMin = Vector2.zero;
+            canvasRect.anchorMax = Vector2.one;
+            canvasRect.offsetMin = Vector2.zero;
+            canvasRect.offsetMax = Vector2.zero;
+        }
+
         GameObject panelRoot = Instantiate(vandDPanelPrefab, canvasRoot.transform);
         panelRoot.name = vandDPanelPrefab.name;
 
         RectTransform panelRect = panelRoot.GetComponent<RectTransform>();
         if (panelRect != null)
         {
-            panelRect.anchorMin = Vector2.zero;
-            panelRect.anchorMax = Vector2.one;
-            panelRect.offsetMin = Vector2.zero;
-            panelRect.offsetMax = Vector2.zero;
-            panelRect.localPosition = Vector3.zero;
-            panelRect.localScale = Vector3.one;
+            OutcomePanelView.CenterInParent(panelRect);
         }
 
         CachePanelViews(panelRoot.transform);
@@ -268,6 +272,7 @@ public class OutcomePanelController : MonoBehaviour
         foreach (OutcomePanelView view in views)
         {
             panelViews[view.gameObject.name] = view;
+            view.ApplyCenteredPosition();
             view.Hide();
             continue;
         }
@@ -287,6 +292,7 @@ public class OutcomePanelController : MonoBehaviour
             }
 
             panelViews[child.name] = view;
+            view.ApplyCenteredPosition();
             view.Hide();
         }
     }
