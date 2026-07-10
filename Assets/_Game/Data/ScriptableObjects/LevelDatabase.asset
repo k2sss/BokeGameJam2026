@@ -16,15 +16,15 @@ MonoBehaviour:
   levels:
   - sceneName: level1
     displayName: "\u7B2C1\u5173"
-    backgroundSprite: {fileID: 0}
+    backgroundSprite: {fileID: 21300000, guid: 8170fe3fe36c012478cae6ee6c28dd0c, type: 3}
     characterSprite: {fileID: 0}
   - sceneName: level2
     displayName: "\u7B2C2\u5173"
-    backgroundSprite: {fileID: 0}
+    backgroundSprite: {fileID: 21300000, guid: 7103e7ab987e3864ca7c468905c421c2, type: 3}
     characterSprite: {fileID: 0}
   - sceneName: level3
     displayName: "\u7B2C3\u5173"
-    backgroundSprite: {fileID: 0}
+    backgroundSprite: {fileID: 21300000, guid: c43ad7b838cfcbd4c8887f1a1f207bb6, type: 3}
     characterSprite: {fileID: 0}
   - sceneName: level4
     displayName: "\u7B2C4\u5173"
