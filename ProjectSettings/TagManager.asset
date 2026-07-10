@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Player
   - Death
+  - AttachPoint
   layers:
   - Default
   - TransparentFX

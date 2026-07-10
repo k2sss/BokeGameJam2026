@@ -263,6 +263,11 @@ public class PlayerController : MonoBehaviour
         blockedAutoAttachPlayer = null;
         blockedAutoAttachUntil = 0f;
         UpdateVirtualCameraFollow();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(GameConstants.AudioNames.AttachPoint);
+        }
     }
 
     private void TryAutoAttachReleasedPlayers()

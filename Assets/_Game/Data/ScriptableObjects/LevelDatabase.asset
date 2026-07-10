@@ -14,15 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMenuSceneName: MainMenu
   levels:
-  - sceneName: SampleScene
-    displayName: Level 1
+  - sceneName: level1
+    displayName: "\u7B2C1\u5173"
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}
-  - sceneName: Level_01
-    displayName: Level 2
+  - sceneName: level2
+    displayName: "\u7B2C2\u5173"
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}
-  - sceneName: Level_02
-    displayName: Level 3
+  - sceneName: level3
+    displayName: "\u7B2C3\u5173"
+    backgroundSprite: {fileID: 0}
+    characterSprite: {fileID: 0}
+  - sceneName: level4
+    displayName: "\u7B2C4\u5173"
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}

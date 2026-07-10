@@ -58,7 +58,11 @@ _Game/
 ├── Prefabs/                  预制体
 │
 ├── Scenes/                   游戏场景
-│   └── SampleScene.unity
+│   ├── MainMenu.unity        # 主界面（Build Index 0）
+│   ├── level1.unity          # 第 1 关
+│   ├── level2.unity          # 第 2 关
+│   ├── level3.unity          # 第 3 关
+│   └── level4.unity          # 第 4 关
 │
 └── Scripts/                  C# 脚本
     ├── Core/                 框架与全局系统（Manager、单例基类）
@@ -87,10 +91,10 @@ _Game/
 
 ```
 Resources/
-├── Audio/                    AudioClipSO 配置（Resources.LoadAll 路径 "Audio"）
-│   └── TestAudio.asset
 └── DOTweenSettings.asset     DOTween 全局配置
 ```
+
+音频配置已迁至 `_Game/Data/ScriptableObjects/`（见下方「音频工作流」），不再放在 `Resources/Audio/`。
 
 ### 音频工作流
 
@@ -98,17 +102,44 @@ Resources/
 _Game/Art/Audio/break.mp3          ← 原始音频（Inspector 中引用）
          │ GUID 引用
          ▼
-Resources/Audio/TestAudio.asset    ← 运行时配置（AudioClipSO）
-         │ Resources.LoadAll<AudioClipSO>("Audio")
+_Game/Data/ScriptableObjects/      ← AudioClipSO + AudioDatabase.asset
+         │ MainMenuController / AudioManager 注入
          ▼
-_Game/Scripts/Core/AudioManager.cs ← AudioAssetLoadPath = "Audio"
+_Game/Scripts/Core/AudioManager.cs ← BGM + SFX 双通道
 ```
 
 **新增音频步骤：**
 1. 将 `.mp3` / `.wav` 放入 `_Game/Art/Audio/`
-2. 在 `_Game/Data/ScriptableObjects/` 或通过菜单 `Create > SO > AudioClip` 创建 SO
-3. 将 SO 复制或链接到 `Resources/Audio/`（或在 `Resources/Audio/` 直接创建）
-4. 确保 SO 的 `audioClipList` 引用了原始 clip
+2. 在 `_Game/Data/ScriptableObjects/` 创建 `AudioClipSO`（菜单 Create > SO > AuidoClip）
+3. 将 SO 的 `audioClipList` 引用原始 clip
+4. 在 `AudioDatabase.asset` 中绑定对应字段
+
+**当前音频 SO（`_Game/Data/ScriptableObjects/`）：**
+
+| 字段 / SO | 通道 | 用途 |
+|-----------|------|------|
+| MainMenuBGM | BGM | 主界面背景音乐 |
+| Level1BGM ~ Level4BGM | BGM | 各关背景音乐（对应 `第一关.mp3` 等） |
+| GameOverBGM | BGM | 死亡界面音乐（非 OneShot） |
+| ButtonClick | SFX | UI 点击 |
+| LevelClear | SFX | 通关 |
+| AttachPointSfx | SFX | 锚定附着 |
+| CountdownSfx | SFX | 倒计时 |
+| CollisionSfx | SFX | 碰撞 / 撞击 |
+| PlayerHitSfx | SFX | 被攻击 / 受击 |
+| FallSfx | SFX | 掉落 / 坠落 |
+| WaterSplashSfx | SFX | 落水 / 入水 |
+| StoryTypingSfx | SFX | 剧情打字 |
+
+**总表：** `Assets/_Game/Data/ScriptableObjects/AudioDatabase.asset` — 与 `LevelDatabase.asset` 同级统一管理。
+
+**完整架构与 API 说明：** 见 [AudioSystemGuide.md](AudioSystemGuide.md)。
+
+**场景 BGM 映射：** `Assets/_Game/Data/ScriptableObjects/SceneBgmConfig.asset` — 场景名 → BGM 名（`GameConstants.AudioNames`）。新场景加一行即可。
+
+**运行时：** `AudioManager` 跨场景常驻；`SceneFlowManager.FinishLoad` 自动切 BGM；死亡时 `EnterGameOverMusic()` 占用 BGM 通道。
+
+**每关音量（存档绑定）：** `save.json` 中 `levelBgmVolumes` / `levelSfxVolumes` 按关卡索引存储（默认 1）。进入关卡时 `AudioManager` 自动从 `SaveManager` 读取并应用；调节时调用 `SetMusicVolume` / `SetSfxVolume`（当前关）或 `SetLevelMusicVolume` / `SetLevelSfxVolume`（指定关）写入存档。
 
 ---
 
@@ -153,7 +184,7 @@ Settings/
 1. **移动资源请在 Unity Editor 内进行**（拖拽），以保留 `.meta` GUID，避免引用丢失
 2. **不要移动 `AmplifyShaderEditor/`**，插件内部有硬编码路径
 3. **`Resources/` 不要滥用**：所有资源都放进去会导致打包体积增大、加载变慢；项目变大后考虑迁移到 Addressables
-4. **Build Settings 场景路径**：当前为 `Assets/_Game/Scenes/SampleScene.unity`
+4. **Build Settings 场景路径**：`MainMenu`（Index 0）+ `level1` / `level2` / `level3` / `level4`
 
 ---
 

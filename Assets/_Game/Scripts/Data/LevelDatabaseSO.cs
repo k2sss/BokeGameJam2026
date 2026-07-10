@@ -79,11 +79,38 @@ public class LevelDatabaseSO : ScriptableObject
         return nextLevel != null ? nextLevel.sceneName : mainMenuSceneName;
     }
 
+    /// <summary>当前场景是否为主菜单。</summary>
+    public bool IsMainMenuScene(string sceneName)
+    {
+        return !string.IsNullOrWhiteSpace(sceneName) &&
+               string.Equals(sceneName, mainMenuSceneName, System.StringComparison.Ordinal);
+    }
+
+    /// <summary>获取第一关场景名；无配置时返回 null。</summary>
+    public string GetFirstLevelSceneName()
+    {
+        LevelEntry firstLevel = GetLevel(0);
+        return firstLevel != null ? firstLevel.sceneName : null;
+    }
+
     /// <summary>
-    /// 根据当前场景名解析下一目标场景名；若当前场景不在列表中则返回主菜单。
+    /// 根据当前场景名解析下一目标场景名。
+    /// 主菜单 → 第一关；关卡内 → 下一关或主菜单；未知场景 → 主菜单。
     /// </summary>
     public string ResolveNextSceneNameByCurrentScene(string currentSceneName)
     {
+        if (IsMainMenuScene(currentSceneName))
+        {
+            string firstLevelScene = GetFirstLevelSceneName();
+            if (!string.IsNullOrWhiteSpace(firstLevelScene))
+            {
+                return firstLevelScene;
+            }
+
+            Debug.LogWarning("[LevelDatabaseSO] 未配置第一关，将停留主菜单。");
+            return mainMenuSceneName;
+        }
+
         int index = GetIndexByScene(currentSceneName);
         if (index < 0)
         {

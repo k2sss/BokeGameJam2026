@@ -34,7 +34,7 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
 
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayOneShot(GameConstants.AudioNames.GameOver);
+            AudioManager.Instance.EnterGameOverMusic();
         }
 
         if (GameOverUI.Instance != null)

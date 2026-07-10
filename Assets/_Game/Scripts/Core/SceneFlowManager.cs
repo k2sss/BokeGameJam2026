@@ -10,6 +10,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 {
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
+    [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
 
     [Header("组件")]
     [SerializeField] private SceneTransitionUI transitionUI;
@@ -33,6 +34,28 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     {
         base.Awake();
         EnsureTransitionUI();
+    }
+
+    /// <summary>运行时或主界面初始化时注入关卡配置表。</summary>
+    public void SetLevelDatabase(LevelDatabaseSO database)
+    {
+        if (database != null)
+        {
+            levelDatabase = database;
+        }
+    }
+
+    public void SetSceneBgmConfig(SceneBgmConfigSO config)
+    {
+        if (config != null)
+        {
+            sceneBgmConfig = config;
+        }
+
+        if (AudioManager.Instance != null && config != null)
+        {
+            AudioManager.Instance.SetSceneBgmConfig(config);
+        }
     }
 
     public void LoadScene(string sceneName, TransitionMode mode = TransitionMode.SimpleFade)
@@ -251,6 +274,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
 
         isLoading = false;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMusicForScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     private void EnsureTransitionUI()

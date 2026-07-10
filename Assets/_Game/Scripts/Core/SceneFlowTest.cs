@@ -6,7 +6,7 @@ using UnityEditor;
 
 /// <summary>
 /// Play 模式测试 SceneFlowManager：
-/// O - LoadNextLevel（SampleScene 会尝试加载 Level_01）
+/// O - LoadNextLevel（主菜单时进入 level1，关卡内进入下一关）
 /// P - ReloadCurrentLevel（重载当前场景，SimpleFade）
 /// M - LoadMainMenu
 /// </summary>
